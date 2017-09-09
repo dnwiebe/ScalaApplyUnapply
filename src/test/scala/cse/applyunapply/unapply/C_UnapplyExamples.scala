@@ -9,7 +9,7 @@ import org.scalatest.path
   * Created by dnwiebe on 9/4/17.
   */
 
-class A_Examples extends path.FunSpec {
+class C_UnapplyExamples extends path.FunSpec {
   describe ("We've seen how pattern matching works on Options.") {
 
     val discountClub = Map ("Tracy" -> 25, "John" -> 20, "Patrick" -> 40)

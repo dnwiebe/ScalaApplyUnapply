@@ -6,7 +6,7 @@ import org.scalatest.path
   * Created by dnwiebe on 9/4/17.
   */
 
-class A_Examples extends path.FunSpec {
+class A_ApplyExamples extends path.FunSpec {
 
   describe ("We all know how methods work:") {
     class Subject {

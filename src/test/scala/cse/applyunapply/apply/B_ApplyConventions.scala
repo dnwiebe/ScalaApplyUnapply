@@ -6,7 +6,7 @@ import org.scalatest.path
   * Created by dnwiebe on 9/4/17.
   */
 
-class B_Conventions extends path.FunSpec {
+class B_ApplyConventions extends path.FunSpec {
 
   trait Make {
     val models: Set[String]

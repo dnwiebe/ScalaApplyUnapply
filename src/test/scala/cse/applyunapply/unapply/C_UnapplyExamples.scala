@@ -105,8 +105,10 @@ class C_UnapplyExamples extends path.FunSpec {
       class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
 
       object Account {
+        val TODAY = new Date ()
+
         def unapply (account: Account): Option[(Int, Date, Boolean)] = {
-          account.established.after (new Date ()) match {
+          account.established.after (TODAY) match {
             case true => None
             case false => Some ((account.balance, account.established, account.isPlatinum))
           }
@@ -125,7 +127,7 @@ class C_UnapplyExamples extends path.FunSpec {
         val result = calculateRate (new Account (1000, mmddyyyy ("01011957"), true), mmddyyyy ("08012017"))
 
         it ("has a rate") {
-          assert (result.isDefined)
+          assert (result === Some (0.05))
         }
       }
 
@@ -133,7 +135,7 @@ class C_UnapplyExamples extends path.FunSpec {
         val result = calculateRate (new Account (1000, mmddyyyy ("01012100"), true), mmddyyyy ("08012017"))
 
         it ("has no rate") {
-          assert (result.isEmpty)
+          assert (result === None)
         }
       }
     }
@@ -141,15 +143,17 @@ class C_UnapplyExamples extends path.FunSpec {
     describe ("Your unapply doesn't always have to return an Option of TupleX, if you only want one value") {
       class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
 
-      object Account {
+      object Balance {
+        val TODAY = new Date ()
+
         def unapply (account: Account): Option[Int] = {
-          if (account.established.after (new Date ())) None else Some (account.balance)
+          if (account.established.after (TODAY)) None else Some (account.balance)
         }
       }
 
       def calculateBalance (account: Account): Option[Int] = {
         account match {
-          case Account (balance) => Some (balance)
+          case Balance (balance) => Some (balance)
           case _ => None
         }
       }
@@ -158,7 +162,7 @@ class C_UnapplyExamples extends path.FunSpec {
         val result = calculateBalance (new Account (1000, mmddyyyy ("01011957"), true))
 
         it ("has a balance") {
-          assert (result.isDefined)
+          assert (result === Some (1000))
         }
       }
 
@@ -166,7 +170,7 @@ class C_UnapplyExamples extends path.FunSpec {
         val result = calculateBalance (new Account (1000, mmddyyyy ("01012100"), true))
 
         it ("has no balance") {
-          assert (result.isEmpty)
+          assert (result === None)
         }
       }
     }
@@ -174,15 +178,17 @@ class C_UnapplyExamples extends path.FunSpec {
     describe ("You don't even have to return an Option at all, if all you need is a Boolean") {
       class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
 
-      object Account {
+      object Existence {
+        val TODAY = new Date ()
+
         def unapply (account: Account): Boolean = {
-          account.established.before (new Date ())
+          account.established.before (TODAY)
         }
       }
 
       def determineExistence (account: Account): Boolean = {
         account match {
-          case Account () => true
+          case Existence () => true
           case _ => false
         }
       }
@@ -207,7 +213,7 @@ class C_UnapplyExamples extends path.FunSpec {
     describe ("One other form of unapply can be used when you don't know how many arguments will come out") {
       class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
 
-      object Account {
+      object Payments {
         val PAYMENT = 25000
         val TODAY = new Date ()
 
@@ -223,10 +229,10 @@ class C_UnapplyExamples extends path.FunSpec {
 
       def calculateThreePayments (account: Account): Option[(Int, Int, Int, Boolean)] = {
         account match {
-          case Account (p1) => Some ((p1, 0, 0, true))
-          case Account (p1, p2) => Some ((p1, p2, 0, true))
-          case Account (p1, p2, p3) => Some ((p1, p2, p3, true))
-          case Account (p1, p2, p3, _*) => Some ((p1, p2, p3, false))
+          case Payments (p1) => Some ((p1, 0, 0, true))
+          case Payments (p1, p2) => Some ((p1, p2, 0, true))
+          case Payments (p1, p2, p3) => Some ((p1, p2, p3, true))
+          case Payments (p1, p2, p3, _*) => Some ((p1, p2, p3, false))
           case _ => None
         }
       }

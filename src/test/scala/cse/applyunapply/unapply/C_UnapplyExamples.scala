@@ -42,11 +42,7 @@ class C_UnapplyExamples extends path.FunSpec {
     def calculateRate (account: Account, today: Date): Double = {
       account match {
         case Account (_, _, isPlatinum) if isPlatinum => 0.05
-        case Account (balance, established, _) => {
-          val balanceFactor = 1.0 - (balance / 1000000.0)
-          val ageFactor = 1.0 - ((today.getTime - established.getTime) / 31536000000.0)
-          0.20 * balanceFactor * ageFactor
-        }
+        case Account (balance, established, _) => rateFor (balance, established, today)
       }
     }
 
@@ -101,9 +97,9 @@ class C_UnapplyExamples extends path.FunSpec {
   }
 
   describe ("But we don't want to code that, because case classes give it to us for free.") {
-    describe ("Let's get a little creative: for example, an account that doesn't exist before its establishment") {
-      class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
+    class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
 
+    describe ("Let's get a little creative: for example, an account that doesn't exist before its establishment") {
       object Account {
         val TODAY = new Date ()
 
@@ -141,8 +137,6 @@ class C_UnapplyExamples extends path.FunSpec {
     }
 
     describe ("Your unapply doesn't always have to return an Option of TupleX, if you only want one value") {
-      class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
-
       object Balance {
         val TODAY = new Date ()
 
@@ -176,8 +170,6 @@ class C_UnapplyExamples extends path.FunSpec {
     }
 
     describe ("You don't even have to return an Option at all, if all you need is a Boolean") {
-      class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
-
       object Existence {
         val TODAY = new Date ()
 
@@ -211,8 +203,6 @@ class C_UnapplyExamples extends path.FunSpec {
     }
 
     describe ("One other form of unapply can be used when you don't know how many arguments will come out") {
-      class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
-
       object Payments {
         val PAYMENT = 25000
         val TODAY = new Date ()
@@ -271,8 +261,6 @@ class C_UnapplyExamples extends path.FunSpec {
     }
 
     describe ("You can also put unapply or unapplySeq in a class and configure objects before matching on them") {
-      class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
-
       class Payments (val payment: Int, today: Date) {
         def unapplySeq (account: Account): Option[Seq[Int]] = {
           if (account.established.after (today)) None else Some (computePayments (account.balance, payment))

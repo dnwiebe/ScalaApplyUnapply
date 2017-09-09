@@ -47,7 +47,7 @@ class B_ApplyConventions extends path.FunSpec {
 
     object Car {
       def apply (model: String): Car = {
-        new Car (List (Ford, Chevrolet, Toyota).find {_.models.exists {_ == model}}.get, model)
+        new Car (List (Ford, Chevrolet, Toyota).find {_.models.contains (model)}.get, model)
       }
     }
 
@@ -75,8 +75,7 @@ class B_ApplyConventions extends path.FunSpec {
       val subject: Array[Int] = Array (5)
 
       it ("we get a single-element array containing the number 5") {
-        assert (subject.length === 1)
-        assert (subject(0) === 5)
+        assert (subject === Array (5))
       }
     }
 

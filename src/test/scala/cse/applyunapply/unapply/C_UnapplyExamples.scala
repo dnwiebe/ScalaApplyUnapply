@@ -208,15 +208,15 @@ class C_UnapplyExamples extends path.FunSpec {
       class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
 
       object Account {
+        val PAYMENT = 25000
+        val TODAY = new Date ()
+
         def unapplySeq (account: Account): Option[Seq[Int]] = {
-          if (account.established.after (new Date ())) {
+          if (account.established.after (TODAY)) {
             None
           }
           else {
-            val payment = 25000
-            val identicalCount = account.balance / payment
-            val lastPayment = account.balance - (payment * identicalCount)
-            Some ((0 until identicalCount).map { _ => payment }.toList ::: List (lastPayment))
+            Some (computePayments (account.balance, PAYMENT))
           }
         }
       }
@@ -263,6 +263,43 @@ class C_UnapplyExamples extends path.FunSpec {
         }
       }
     }
+
+    describe ("You can also put unapply or unapplySeq in a class and configure objects before matching on them") {
+      class Account (val balance: Int, val established: Date, val isPlatinum: Boolean)
+
+      class Payments (val payment: Int, today: Date) {
+        def unapplySeq (account: Account): Option[Seq[Int]] = {
+          if (account.established.after (today)) None else Some (computePayments (account.balance, payment))
+        }
+      }
+
+      def calculateThreePayments (account: Account, payment: Int): Option[(Int, Int, Int, Boolean)] = {
+        val payments = new Payments (payment, mmddyyyy ("08012017"))
+        account match {
+          case payments (p1) => Some ((p1, 0, 0, true))
+          case payments (p1, p2) => Some ((p1, p2, 0, true))
+          case payments (p1, p2, p3) => Some ((p1, p2, p3, true))
+          case payments (p1, p2, p3, _*) => Some ((p1, p2, p3, false))
+          case _ => None
+        }
+      }
+
+      describe ("An account with $500, given payments of $300") {
+        val result = calculateThreePayments (new Account (50000, mmddyyyy ("01012017"), true), 30000)
+
+        it ("requires two payments") {
+          assert (result === Some ((30000, 20000, 0, true)))
+        }
+      }
+
+      describe ("An account with $500, given payments of $100") {
+        val result = calculateThreePayments (new Account (50000, mmddyyyy ("01012017"), true), 10000)
+
+        it ("won't be paid off") {
+          assert (result === Some ((10000, 10000, 10000, false)))
+        }
+      }
+    }
   }
 
   private def mmddyyyy (strDate: String): Date = {
@@ -273,5 +310,11 @@ class C_UnapplyExamples extends path.FunSpec {
     val balanceFactor = 1.0 - (balance / 1000000.0)
     val ageFactor = 1.0 - ((today.getTime - established.getTime) / 31536000000.0)
     0.20 * balanceFactor * ageFactor
+  }
+
+  private def computePayments (balance: Int, payment: Int): Seq[Int] = {
+    val identicalCount = balance / payment
+    val lastPayment = balance - (payment * identicalCount)
+    (0 until identicalCount).map { _ => payment }.toList ::: List (lastPayment)
   }
 }

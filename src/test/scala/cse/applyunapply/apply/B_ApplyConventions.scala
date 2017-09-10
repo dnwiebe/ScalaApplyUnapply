@@ -32,6 +32,7 @@ class B_ApplyConventions extends path.FunSpec {
     it ("and it will act the way you expect") {
       assert (subject.make === Ford)
       assert (subject.model === "Fusion")
+      assert (subject.make.models.contains (subject.model) === true)
     }
 
     describe ("but you can also create a Car that doesn't make any sense") {

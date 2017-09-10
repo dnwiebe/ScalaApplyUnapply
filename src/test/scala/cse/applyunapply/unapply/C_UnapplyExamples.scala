@@ -41,8 +41,8 @@ class C_UnapplyExamples extends path.FunSpec {
 
     def calculateRate (account: Account, today: Date): Double = {
       account match {
-        case Account (_, _, isPlatinum) if isPlatinum => 0.05
-        case Account (balance, established, _) => rateFor (balance, established, today)
+        case Account (_, _, true) => 0.05
+        case Account (balance, established, false) => rateFor (balance, established, today)
       }
     }
 
